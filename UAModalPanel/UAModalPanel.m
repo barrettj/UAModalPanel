@@ -18,11 +18,12 @@
 #define DEFAULT_BORDER_WIDTH		1.5f
 #define DEFAULT_BORDER_COLOR		[UIColor whiteColor]
 #define DEFAULT_BOUNCE				YES
+#define DEFAULT_KEYBOARD_MOVE		YES
 
 @implementation UAModalPanel
 
 @synthesize roundedRect, closeButton, delegate, contentView, contentContainer;
-@synthesize innerMargin, outerMargin, cornerRadius, borderWidth, borderColor, contentColor, shouldBounce;
+@synthesize innerMargin, outerMargin, cornerRadius, borderWidth, borderColor, contentColor, shouldBounce, shouldMoveForKeyboard;
 @synthesize onClosePressed;
 
 - (void)calculateInnerFrame {
@@ -47,6 +48,7 @@
 		borderColor = [DEFAULT_BORDER_COLOR retain];
 		contentColor = [DEFAULT_BACKGROUND_COLOR retain];
 		shouldBounce = DEFAULT_BOUNCE;
+        shouldMoveForKeyboard = DEFAULT_KEYBOARD_MOVE;
 		
 		self.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
 		self.autoresizesSubviews = YES;
@@ -70,7 +72,7 @@
 }
 
 - (void)dealloc {
-	self.roundedRect = nil;
+    self.roundedRect = nil;
 	self.closeButton = nil;
 	self.contentContainer = nil;
 	self.borderColor = nil;
@@ -196,33 +198,46 @@
 	self.alpha = 0.0;
 	self.contentContainer.transform = CGAffineTransformMakeScale(0.00001, 0.00001);
 	
+    if (self.shouldMoveForKeyboard) {
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(keyboardWillShow:)
+                                                     name:UIKeyboardWillShowNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(keyboardDidShow:)
+                                                     name:UIKeyboardDidShowNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(keyboardWillHide:)
+                                                     name:UIKeyboardWillHideNotification
+                                                   object:nil];
+    }
 	
 	void (^animationBlock)(BOOL) = ^(BOOL finished) {
 		[self showAnimationPart1Finished];
-		// Wait one second and then fade in the view
+		
+        // Wait one second and then fade in the view
 		[UIView animateWithDuration:0.1
 						 animations:^{
-							 self.contentContainer.transform = CGAffineTransformMakeScale(0.95, 0.95);
+                             self.contentContainer.transform = CGAffineTransformMakeScale(0.95, 0.95);
 						 }
 						 completion:^(BOOL finished){
-							 
 							 [self showAnimationPart2Finished];
-							 // Wait one second and then fade in the view
+                             // Wait one second and then fade in the view
 							 [UIView animateWithDuration:0.1
 											  animations:^{
-												  self.contentContainer.transform = CGAffineTransformMakeScale(1.02, 1.02);
+                                                  self.contentContainer.transform = CGAffineTransformMakeScale(1.02, 1.02);
 											  }
 											  completion:^(BOOL finished){
-												  
 												  [self showAnimationPart3Finished];
-												  // Wait one second and then fade in the view
+                                                  // Wait one second and then fade in the view
 												  [UIView animateWithDuration:0.1
 																   animations:^{
 																	   self.contentContainer.transform = CGAffineTransformIdentity;
 																   }
 																   completion:^(BOOL finished){
-																	   [self showAnimationFinished];																						
-																   }];
+                                                                       [self showAnimationFinished];
+                                                                   }];
 											  }];
 						 }];
 	};
@@ -268,8 +283,166 @@
 					 completion:^(BOOL finished){
 						 if (onComplete)
                              onComplete(finished);
+                         
+                         [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
+                         [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidShowNotification object:nil];
+                         [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
 					 }];
 }
 
+
+#pragma mark - Keyboard Moving
+
+- (void)keyboardWillShow:(NSNotification *)notification {
+    CGFloat keyboardHeight;
+    CGFloat animationDuration = 0.3;
+    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    if (notification) {
+        NSDictionary* keyboardInfo = [notification userInfo];
+        CGRect keyboardFrame = [[keyboardInfo valueForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue];
+        animationDuration = [[keyboardInfo valueForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+        
+        if(UIInterfaceOrientationIsPortrait(orientation))
+            keyboardHeight = keyboardFrame.size.height;
+        else
+            keyboardHeight = keyboardFrame.size.width;
+    }
+    
+    CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height;
+    
+    if(UIInterfaceOrientationIsPortrait(orientation))
+        screenHeight = [UIScreen mainScreen].bounds.size.height;
+    else
+        screenHeight = [UIScreen mainScreen].bounds.size.width;
+    
+    
+    __block CGRect frame = self.roundedRect.frame;
+    keyboardDelta = frame.origin.y;
+    
+    if (frame.origin.y + frame.size.height > screenHeight - keyboardHeight) {
+        
+        frame.origin.y = screenHeight - keyboardHeight - frame.size.height - 10;
+        
+        if (frame.origin.y < 0)
+            frame.origin.y = 0;
+        
+        keyboardDelta -= frame.origin.y;
+        
+        [UIView animateWithDuration:animationDuration
+                              delay:0.0
+                            options:UIViewAnimationCurveEaseOut | UIViewAnimationOptionBeginFromCurrentState
+                         animations:^{
+                             self.roundedRect.frame = frame;
+                             
+                             frame = self.closeButton.frame;
+                             frame.origin.y -= keyboardDelta;
+                             self.closeButton.frame = frame;
+
+                             frame = self.contentView.frame;
+                             frame.origin.y -= keyboardDelta;
+                             self.contentView.frame = frame;
+                             
+                             self.contentContainer.transform = CGAffineTransformIdentity;
+                         } 
+                         completion:nil];
+    }
+    else {
+        keyboardDelta = 0.0f;
+    }
+}
+
+- (void)keyboardDidShow:(NSNotification *)notification {
+    // sometimes we couldn't move the view during willShow (eg when a text field has immediate focus), so we move it here
+    CGFloat keyboardHeight;
+    CGFloat animationDuration = 0.3;
+    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    if (notification) {
+        NSDictionary* keyboardInfo = [notification userInfo];
+        CGRect keyboardFrame = [[keyboardInfo valueForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue];
+        animationDuration = [[keyboardInfo valueForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+        
+        if(UIInterfaceOrientationIsPortrait(orientation))
+            keyboardHeight = keyboardFrame.size.height;
+        else
+            keyboardHeight = keyboardFrame.size.width;
+    }
+    
+    CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height;
+    
+    if(UIInterfaceOrientationIsPortrait(orientation))
+        screenHeight = [UIScreen mainScreen].bounds.size.height;
+    else
+        screenHeight = [UIScreen mainScreen].bounds.size.width;
+    
+    
+    __block CGRect frame = self.roundedRect.frame;
+    CGFloat previousKeyboardDelta = keyboardDelta;
+    keyboardDelta = frame.origin.y;
+    
+    if (frame.origin.y + frame.size.height > screenHeight - keyboardHeight) {
+        
+        frame.origin.y = screenHeight - keyboardHeight - frame.size.height - 10;
+        
+        if (frame.origin.y < 0)
+            frame.origin.y = 0;
+        
+        keyboardDelta -= frame.origin.y;
+        
+        [UIView animateWithDuration:animationDuration
+                              delay:0.0
+                            options:UIViewAnimationCurveEaseOut | UIViewAnimationOptionBeginFromCurrentState
+                         animations:^{
+                             self.roundedRect.frame = frame;
+                             
+                             frame = self.closeButton.frame;
+                             frame.origin.y -= keyboardDelta;
+                             self.closeButton.frame = frame;
+                             
+                             frame = self.contentView.frame;
+                             frame.origin.y -= keyboardDelta;
+                             self.contentView.frame = frame;
+                             
+                             self.contentContainer.transform = CGAffineTransformIdentity;
+                         } 
+                         completion:nil];
+    }
+    else {
+        keyboardDelta = previousKeyboardDelta;
+    }
+}
+
+
+- (void)keyboardWillHide:(NSNotification*)notification {
+    if (keyboardDelta > 0.0f) {
+        CGFloat animationDuration = 0.3;
+        
+        if (notification) {
+            NSDictionary* keyboardInfo = [notification userInfo];
+            animationDuration = [[keyboardInfo valueForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+        }
+        
+        [UIView animateWithDuration:animationDuration
+                              delay:0.0
+                            options:UIViewAnimationCurveEaseOut | UIViewAnimationOptionBeginFromCurrentState
+                         animations:^{
+                             CGRect frame;
+
+                             frame = self.roundedRect.frame;
+                             frame.origin.y += keyboardDelta;
+                             self.roundedRect.frame = frame;
+                             
+                             frame = self.closeButton.frame;
+                             frame.origin.y += keyboardDelta;
+                             self.closeButton.frame = frame;
+                             
+                             frame = self.contentView.frame;
+                             frame.origin.y += keyboardDelta;
+                             self.contentView.frame = frame;
+                         } 
+                         completion:nil];
+    }
+}
 
 @end

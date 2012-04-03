@@ -32,7 +32,9 @@ typedef void (^UAModalDisplayPanelAnimationComplete)(BOOL finished);
 	CGFloat		cornerRadius;
 	UIColor		*contentColor;
 	BOOL		shouldBounce;
-	
+	BOOL		shouldMoveForKeyboard;
+    
+    CGFloat keyboardDelta;
 }
 
 @property (nonatomic, assign) id			delegate;
@@ -55,6 +57,9 @@ typedef void (^UAModalDisplayPanelAnimationComplete)(BOOL finished);
 @property (nonatomic, retain) UIColor		*contentColor;
 // Shows the bounce animation. Default = YES
 @property (nonatomic, assign) BOOL			shouldBounce;
+// Moves the content if the keyboard will cover it. Default = YES
+@property (nonatomic, assign) BOOL			shouldMoveForKeyboard;
+
 
 @property (readwrite, copy) UAModalDisplayPanelEvent onClosePressed;
 
