@@ -136,7 +136,7 @@
 		self.contentView = [[[UIView alloc] initWithFrame:CGRectZero] autorelease];
 		self.contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
 		self.contentView.autoresizesSubviews = YES;
-		[self.contentContainer addSubview:contentView];
+		[self.contentContainer insertSubview:contentView belowSubview:self.closeButton];
 	}
 	return contentView;
 }
