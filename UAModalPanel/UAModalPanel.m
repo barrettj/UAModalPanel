@@ -248,19 +248,10 @@
 }
 
 - (void)hideWithDelegate:(id)del selector:(SEL)sel {	
-	// Hide the view right away
-    [UIView animateWithDuration:0.3
-					 animations:^{
-						 self.alpha = 0;
-						 if (startEndPoint.x != CGPointZero.x || startEndPoint.y != CGPointZero.y) {
-							 self.contentContainer.center = startEndPoint;
-						 }
-						 self.contentContainer.transform = CGAffineTransformMakeScale(0.0001, 0.0001);
-					 }
-					 completion:^(BOOL finished){
-						 if ([del respondsToSelector:sel])
-							 [del performSelector:sel];
-					 }];
+    [self hideWithOnComplete:^(BOOL finished) {
+        if ([del respondsToSelector:sel])
+            [del performSelector:sel];
+    }];
 }
 
 
