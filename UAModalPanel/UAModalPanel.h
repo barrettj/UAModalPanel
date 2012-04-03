@@ -59,7 +59,7 @@ typedef void (^UAModalDisplayPanelAnimationComplete)(BOOL finished);
 @property (nonatomic, assign) BOOL			shouldBounce;
 // Moves the content if the keyboard will cover it. Default = YES
 @property (nonatomic, assign) BOOL			shouldMoveForKeyboard;
-// Ignores the outerMargin specified and sizes based on contentView. Default = NO
+// Ignores the outerMargin specified and sizes based on contentView (which you must manually set!). Default = NO
 @property (nonatomic, assign) BOOL			sizeToContent;
 
 
