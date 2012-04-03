@@ -19,11 +19,12 @@
 #define DEFAULT_BORDER_COLOR		[UIColor whiteColor]
 #define DEFAULT_BOUNCE				YES
 #define DEFAULT_KEYBOARD_MOVE		YES
+#define DEFAULT_SIZE_TO_CONTENT     NO
 
 @implementation UAModalPanel
 
 @synthesize roundedRect, closeButton, delegate, contentView, contentContainer;
-@synthesize innerMargin, outerMargin, cornerRadius, borderWidth, borderColor, contentColor, shouldBounce, shouldMoveForKeyboard;
+@synthesize innerMargin, outerMargin, cornerRadius, borderWidth, borderColor, contentColor, shouldBounce, shouldMoveForKeyboard, sizeToContent;
 @synthesize onClosePressed;
 
 - (void)calculateInnerFrame {
@@ -49,6 +50,7 @@
 		contentColor = [DEFAULT_BACKGROUND_COLOR retain];
 		shouldBounce = DEFAULT_BOUNCE;
         shouldMoveForKeyboard = DEFAULT_KEYBOARD_MOVE;
+        sizeToContent = DEFAULT_SIZE_TO_CONTENT;
 		
 		self.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
 		self.autoresizesSubviews = YES;
@@ -144,7 +146,7 @@
 }
 
 - (CGRect)roundedRectFrame {
-	[self calculateInnerFrame];
+    [self calculateInnerFrame];
 	CGFloat x = (self.frame.origin.x + floor((self.frame.size.width - innerFrame.size.width)/2));
 	CGFloat y = (self.frame.origin.y + floor((self.frame.size.height - innerFrame.size.height)/2));
 	return CGRectMake(x + self.outerMargin,
@@ -154,7 +156,7 @@
 }
 
 - (CGRect)closeButtonFrame {
-	CGRect f = [self roundedRectFrame];
+	CGRect f = self.roundedRect.frame;
 	return CGRectMake(f.origin.x - floor(closeButton.frame.size.width*0.5),
 					  f.origin.y - floor(closeButton.frame.size.height*0.5),
 					  closeButton.frame.size.width,
@@ -162,7 +164,7 @@
 }
 
 - (CGRect)contentViewFrame {
-	CGRect rect = CGRectInset([self roundedRectFrame], self.innerMargin, self.innerMargin);
+    CGRect rect = CGRectInset([self roundedRectFrame], self.innerMargin, self.innerMargin);
 	return rect;
 }
 
@@ -170,10 +172,18 @@
 - (void)layoutSubviews {
 	[super layoutSubviews];
 	
-	self.roundedRect.frame = [self roundedRectFrame];
-	self.closeButton.frame = [self closeButtonFrame];
-	self.contentView.frame = [self contentViewFrame];
-	
+    if (self.sizeToContent) {
+        contentView.center = self.center;
+        roundedRect.bounds = CGRectInset(contentView.frame, -self.innerMargin, -self.innerMargin);
+        roundedRect.center = self.center;
+    }
+    else {
+        self.roundedRect.frame = [self roundedRectFrame];
+        self.contentView.frame = [self contentViewFrame];
+	}
+    
+    self.closeButton.frame = [self closeButtonFrame];
+
 //	DebugLog(@"roundedRect: %@", NSStringFromCGRect([self _roundedRectFrame]));
 //	DebugLog(@"contentView: %@", NSStringFromCGRect([self _contentViewFrame]));
 }
