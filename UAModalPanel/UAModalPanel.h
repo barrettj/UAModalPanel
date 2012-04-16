@@ -35,6 +35,7 @@ typedef void (^UAModalDisplayPanelAnimationComplete)(BOOL finished);
 	BOOL		shouldMoveForKeyboard;
     
     CGFloat keyboardDelta;
+    UITapGestureRecognizer *touchOutside;
 }
 
 @property (nonatomic, assign) id			delegate;
@@ -61,6 +62,8 @@ typedef void (^UAModalDisplayPanelAnimationComplete)(BOOL finished);
 @property (nonatomic, assign) BOOL			shouldMoveForKeyboard;
 // Ignores the outerMargin specified and sizes based on contentView (which you must manually set!). Default = NO
 @property (nonatomic, assign) BOOL			sizeToContent;
+// Tapping anywhere in the darkened area acts like tapping the close button.  Default = NO;
+@property (nonatomic, assign) BOOL tapOutsideToClose;
 
 
 @property (readwrite, copy) UAModalDisplayPanelEvent onClosePressed;

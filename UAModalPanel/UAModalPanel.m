@@ -24,7 +24,7 @@
 @implementation UAModalPanel
 
 @synthesize roundedRect, closeButton, delegate, contentView, contentContainer;
-@synthesize innerMargin, outerMargin, cornerRadius, borderWidth, borderColor, contentColor, shouldBounce, shouldMoveForKeyboard, sizeToContent;
+@synthesize innerMargin, outerMargin, cornerRadius, borderWidth, borderColor, contentColor, shouldBounce, shouldMoveForKeyboard, sizeToContent, tapOutsideToClose;
 @synthesize onClosePressed;
 
 - (void)calculateInnerFrame {
@@ -51,6 +51,7 @@
 		shouldBounce = DEFAULT_BOUNCE;
         shouldMoveForKeyboard = DEFAULT_KEYBOARD_MOVE;
         sizeToContent = DEFAULT_SIZE_TO_CONTENT;
+        self.tapOutsideToClose = NO;
 		
 		self.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
 		self.autoresizesSubviews = YES;
@@ -198,6 +199,14 @@
         self.onClosePressed(self);
 }
 
+- (void)tapHandler:(UITapGestureRecognizer*)gesture {
+    if (gesture.state == UIGestureRecognizerStateRecognized && self.tapOutsideToClose) {
+        if (!CGRectContainsPoint(roundedRect.bounds, [gesture locationInView:self])) {
+            [self closePressed:self.closeButton];
+        }
+    }
+}
+
 - (void)showAnimationStarting {};		//subcalsses override
 - (void)showAnimationPart1Finished {};	//subcalsses override
 - (void)showAnimationPart2Finished {};	//subcalsses override
@@ -208,6 +217,16 @@
 	self.alpha = 0.0;
 	self.contentContainer.transform = CGAffineTransformMakeScale(0.00001, 0.00001);
 	
+    if (touchOutside) {
+        [self removeGestureRecognizer:touchOutside];
+        touchOutside = nil;
+    }
+    
+    if (self.tapOutsideToClose) {
+        touchOutside = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapHandler:)];
+        [self addGestureRecognizer:touchOutside];
+    }
+    
     if (self.shouldMoveForKeyboard) {
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(keyboardWillShow:)
