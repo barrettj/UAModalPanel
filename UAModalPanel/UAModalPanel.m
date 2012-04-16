@@ -200,8 +200,12 @@
 }
 
 - (void)tapHandler:(UITapGestureRecognizer*)gesture {
-    if (gesture.state == UIGestureRecognizerStateRecognized && self.tapOutsideToClose) {
-        if (!CGRectContainsPoint(roundedRect.bounds, [gesture locationInView:self])) {
+    if (gesture.state == UIGestureRecognizerStateRecognized) {
+        if (
+            CGRectContainsPoint(closeButton.frame, [gesture locationInView:self]) ||
+            (!CGRectContainsPoint(roundedRect.frame, [gesture locationInView:self]) && self.tapOutsideToClose)
+            
+            ) {
             [self closePressed:self.closeButton];
         }
     }
