@@ -62,24 +62,18 @@
 }
 
 
-// overriding the subclass to make room for the title bar
-- (CGRect)contentViewFrame {
-	CGRect titleBarFrame = [self titleBarFrame];
-	CGRect roundedRectFrame = [self roundedRectFrame];
-	CGFloat y = titleBarFrame.origin.y + titleBarFrame.size.height;
-	CGRect rect = CGRectMake(self.outerMargin + self.innerMargin,
-							 self.outerMargin + self.innerMargin + y,
-							 roundedRectFrame.size.width - 2*self.innerMargin,
-							 roundedRectFrame.size.height - y - 2*self.innerMargin);
-	return rect;
-}
-
-
 - (void)layoutSubviews {
 	[super layoutSubviews];
 	
-	self.titleBar.frame = [self titleBarFrame];
+    CGRect frame = self.roundedRect.frame;
+    frame.origin.y -= self.titleBarHeight;
+    frame.size.height += self.titleBarHeight;
+    self.roundedRect.frame = frame;
+    
+    self.titleBar.frame = [self titleBarFrame];
 	self.headerLabel.frame = self.titleBar.bounds;
+    
+    self.closeButton.frame = [self closeButtonFrame];
 }
 
 
