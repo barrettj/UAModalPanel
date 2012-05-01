@@ -21,6 +21,9 @@
 #define DEFAULT_KEYBOARD_MOVE		YES
 #define DEFAULT_SIZE_TO_CONTENT     NO
 
+@interface UAModalPanel () <UIGestureRecognizerDelegate>
+@end
+
 @implementation UAModalPanel
 
 @synthesize roundedRect, closeButton, delegate, contentView, contentContainer;
@@ -199,6 +202,13 @@
         self.onClosePressed(self);
 }
 
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
+    if (CGRectContainsPoint(roundedRect.frame, [touch locationInView:self])){
+        return NO;
+    }
+    return YES;
+}
+
 - (void)tapHandler:(UITapGestureRecognizer*)gesture {
     if (gesture.state == UIGestureRecognizerStateRecognized) {
         if (
@@ -228,6 +238,7 @@
     
     if (self.tapOutsideToClose) {
         touchOutside = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapHandler:)];
+        touchOutside.delegate = self;
         [self addGestureRecognizer:touchOutside];
     }
     
