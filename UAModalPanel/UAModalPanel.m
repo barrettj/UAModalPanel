@@ -289,7 +289,7 @@
 	// Show the view right away
     [UIView animateWithDuration:0.3
 						  delay:0.0
-						options:UIViewAnimationCurveEaseOut
+						options:UIViewAnimationOptionCurveEaseOut
 					 animations:^{
 						 self.alpha = 1.0;
 						 self.contentContainer.center = self.center;
@@ -338,7 +338,7 @@
 #pragma mark - Keyboard Moving
 
 - (void)keyboardWillShow:(NSNotification *)notification {
-    CGFloat keyboardHeight;
+    CGFloat keyboardHeight = 0;
     CGFloat animationDuration = 0.3;
     UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
     
@@ -353,7 +353,7 @@
             keyboardHeight = keyboardFrame.size.width;
     }
     
-    CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height;
+    CGFloat screenHeight = 0;
     
     if(UIInterfaceOrientationIsPortrait(orientation))
         screenHeight = [UIScreen mainScreen].bounds.size.height;
@@ -398,7 +398,7 @@
 
 - (void)keyboardDidShow:(NSNotification *)notification {
     // sometimes we couldn't move the view during willShow (eg when a text field has immediate focus), so we move it here
-    CGFloat keyboardHeight;
+    CGFloat keyboardHeight = 0;
     CGFloat animationDuration = 0.3;
     UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
     
@@ -413,7 +413,7 @@
             keyboardHeight = keyboardFrame.size.width;
     }
     
-    CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height;
+    CGFloat screenHeight = 0;
     
     if(UIInterfaceOrientationIsPortrait(orientation))
         screenHeight = [UIScreen mainScreen].bounds.size.height;
