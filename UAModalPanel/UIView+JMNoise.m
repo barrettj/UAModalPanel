@@ -11,8 +11,8 @@
 
 #define JM_SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 
-#pragma Mark -
-#pragma Mark - Noise Layer
+#pragma mark -
+#pragma mark - Noise Layer
 
 @interface NoiseLayer : CALayer
 + (UIImage *)noiseTileImage;
@@ -23,13 +23,13 @@
 
 static UIImage * JMNoiseImage;
 
-- (void)setFrame:(CGRect)frame;
+- (void)setFrame:(CGRect)frame
 {
     [super setFrame:frame];
     [self setNeedsDisplay];
 }
 
-+ (void)drawPixelInContext:(CGContextRef)context point:(CGPoint)point width:(CGFloat)width opacity:(CGFloat)opacity whiteLevel:(CGFloat)whiteLevel;
++ (void)drawPixelInContext:(CGContextRef)context point:(CGPoint)point width:(CGFloat)width opacity:(CGFloat)opacity whiteLevel:(CGFloat)whiteLevel
 {
     CGColorRef fillColor = [UIColor colorWithWhite:whiteLevel alpha:opacity].CGColor;
     CGContextSetFillColor(context, CGColorGetComponents(fillColor));
@@ -37,7 +37,7 @@ static UIImage * JMNoiseImage;
     CGContextFillEllipseInRect(context, pointRect);
 }
 
-+ (UIImage *)noiseTileImage;
++ (UIImage *)noiseTileImage
 {
     if (!JMNoiseImage)
     {
@@ -84,7 +84,7 @@ static UIImage * JMNoiseImage;
     return JMNoiseImage;
 }
 
-- (void)drawInContext:(CGContextRef)ctx;
+- (void)drawInContext:(CGContextRef)ctx
 {
     UIGraphicsPushContext(ctx);
     [[NoiseLayer noiseTileImage] drawAsPatternInRect:self.bounds];
@@ -93,17 +93,17 @@ static UIImage * JMNoiseImage;
 
 @end
 
-#pragma Mark -
-#pragma Mark - UIView implementations
+#pragma mark -
+#pragma mark - UIView implementations
 
 @implementation UIView (JMNoise)
 
-- (void)applyNoise;
+- (void)applyNoise
 {
     [self applyNoiseWithOpacity:kNoiseDefaultOpacity];
 }
 
-- (void)applyNoiseWithOpacity:(CGFloat)opacity atLayerIndex:(NSUInteger) layerIndex;
+- (void)applyNoiseWithOpacity:(CGFloat)opacity atLayerIndex:(NSUInteger) layerIndex
 {
     NoiseLayer * noiseLayer = [[[NoiseLayer alloc] init] autorelease];
     [noiseLayer setFrame:self.bounds];
@@ -112,22 +112,22 @@ static UIImage * JMNoiseImage;
     [self.layer insertSublayer:noiseLayer atIndex:layerIndex];
 }
 
-- (void)applyNoiseWithOpacity:(CGFloat)opacity;
+- (void)applyNoiseWithOpacity:(CGFloat)opacity
 {
     [self applyNoiseWithOpacity:opacity atLayerIndex:0];
 }
 
-- (void)drawCGNoise;
+- (void)drawCGNoise
 {
     [self drawCGNoiseWithOpacity:kNoiseDefaultOpacity];
 }
 
-- (void)drawCGNoiseWithOpacity:(CGFloat)opacity;
+- (void)drawCGNoiseWithOpacity:(CGFloat)opacity
 {
     [self drawCGNoiseWithOpacity:opacity blendMode:kCGBlendModeNormal];
 }
 
-- (void)drawCGNoiseWithOpacity:(CGFloat)opacity blendMode:(CGBlendMode)blendMode;
+- (void)drawCGNoiseWithOpacity:(CGFloat)opacity blendMode:(CGBlendMode)blendMode
 {
     CGContextRef context = UIGraphicsGetCurrentContext();
     CGContextSaveGState(context);    

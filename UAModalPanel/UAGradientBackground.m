@@ -50,7 +50,7 @@
 + (id)gradientWithFrame:(CGRect)frame style:(UAGradientBackgroundStyle)aStyle {
 	return [[[UAGradientBackground alloc] initWithFrame:frame style:aStyle] autorelease];
 }
-+ (id)gradientWithFrame:(CGRect)frame; {
++ (id)gradientWithFrame:(CGRect)frame {
 	return [[[UAGradientBackground alloc] initWithFrame:frame] autorelease];
 }
 
