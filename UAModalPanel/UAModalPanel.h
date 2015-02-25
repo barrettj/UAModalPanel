@@ -67,6 +67,8 @@ typedef void (^UAModalDisplayPanelAnimationComplete)(BOOL finished);
 
 @property (nonatomic, assign) CGFloat animationTimeScale;
 
+@property (nonatomic, copy) UAModalDisplayPanelEvent didFinishShowAnimation;
+
 @property (readwrite, copy) UAModalDisplayPanelEvent onClosePressed;
 
 - (void)show;

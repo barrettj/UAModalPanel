@@ -228,7 +228,7 @@
 - (void)showAnimationPart1Finished {};  //subcalsses override
 - (void)showAnimationPart2Finished {};  //subcalsses override
 - (void)showAnimationPart3Finished {};  //subcalsses override
-- (void)showAnimationFinished {};       //subcalsses override
+- (void)showAnimationFinished { if (self.didFinishShowAnimation) { self.didFinishShowAnimation(self); } };      //subcalsses override
 - (void)show {
     [self showAnimationStarting];
     self.alpha = 0.0;
