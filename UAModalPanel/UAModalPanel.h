@@ -65,6 +65,7 @@ typedef void (^UAModalDisplayPanelAnimationComplete)(BOOL finished);
 // Tapping anywhere in the darkened area acts like tapping the close button.  Default = NO;
 @property (nonatomic, assign) BOOL tapOutsideToClose;
 
+@property (nonatomic, assign) CGFloat animationTimeScale;
 
 @property (readwrite, copy) UAModalDisplayPanelEvent onClosePressed;
 

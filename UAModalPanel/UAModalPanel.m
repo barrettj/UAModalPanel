@@ -57,6 +57,8 @@
         sizeToContent = DEFAULT_SIZE_TO_CONTENT;
         self.tapOutsideToClose = NO;
         
+        self.animationTimeScale = 1.0;
+        
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
         self.autoresizesSubviews = YES;
         
@@ -262,21 +264,21 @@
         [self showAnimationPart1Finished];
         
         // Wait one second and then fade in the view
-        [UIView animateWithDuration:0.1
+        [UIView animateWithDuration:0.1 * self.animationTimeScale
                          animations:^{
                              self.contentContainer.transform = CGAffineTransformMakeScale(0.95, 0.95);
                          }
                          completion:^(BOOL finished){
                              [self showAnimationPart2Finished];
                              // Wait one second and then fade in the view
-                             [UIView animateWithDuration:0.1
+                             [UIView animateWithDuration:0.1 * self.animationTimeScale
                                               animations:^{
                                                   self.contentContainer.transform = CGAffineTransformMakeScale(1.02, 1.02);
                                               }
                                               completion:^(BOOL finished){
                                                   [self showAnimationPart3Finished];
                                                   // Wait one second and then fade in the view
-                                                  [UIView animateWithDuration:0.1
+                                                  [UIView animateWithDuration:0.1 * self.animationTimeScale
                                                                    animations:^{
                                                                        self.contentContainer.transform = CGAffineTransformIdentity;
                                                                    }
@@ -288,7 +290,7 @@
     };
     
     // Show the view right away
-    [UIView animateWithDuration:0.3
+    [UIView animateWithDuration:0.3 * self.animationTimeScale
                           delay:0.0
                         options:UIViewAnimationOptionCurveEaseOut
                      animations:^{
@@ -317,7 +319,7 @@
 
 - (void)hideWithOnComplete:(UAModalDisplayPanelAnimationComplete)onComplete {
     // Hide the view right away
-    [UIView animateWithDuration:0.3
+    [UIView animateWithDuration:0.3 * self.animationTimeScale
                      animations:^{
                          self.alpha = 0;
                          if (startEndPoint.x != CGPointZero.x || startEndPoint.y != CGPointZero.y) {
